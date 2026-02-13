@@ -37,7 +37,25 @@ def flows_to_tensors(flows_df):
     return node_features, adjacency, None
 
 def create_flow_edges(flows_df):
-    return None
+    edges = []
+
+    for i in range(len(flows_df)):
+        for j in range(i + 1, len(flows_df)):
+            if (flows_df.iloc[i]['src_ip'] == flows_df.iloc[j]['src_ip'] 
+                    or flows_df.iloc[i]['dst_ip'] == flows_df.iloc[j]['dst_ip'] 
+                    or flows_df.iloc[i]['src_ip'] == flows_df.iloc[j]['dst_ip'] 
+                    or flows_df.iloc[i]['dst_ip'] == flows_df.iloc[j]['src_ip']):
+
+                edges.append((i, j))
+                edges.append((j, i)) 
+
+    if len(edges) == 0:
+        edges = [[i, i] for i in range(len(flows_df))]
+
+    return edges
 
 def create_sparse_adjacency(edges, flow_count):
-    return None
+    adjacency = np.zeros((flow_count, flow_count))
+    for edge in edges:
+        adjacency[edge[0], edge[1]] = 1
+    return adjacency
