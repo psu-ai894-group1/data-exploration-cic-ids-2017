@@ -54,23 +54,37 @@ def main():
     setup_logging()
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--iface', default='eth0', help='Network interface to capture (default: eth0)')
+    parser.add_argument('-p', '--pcap', help='PCAP File to extract flows from')
     args = parser.parse_args()
 
+    sniffer = None
     output_dir = './output/'
+
+    if args.pcap:
+        sniffer = create_sniffer(
+            input_file=args.pcap,
+            to_csv=True,
+            output_file=os.path.join(output_dir, 'out.csv')
+        )
+    else:
+        sniffer = create_sniffer(
+            input_interface=args.iface,
+            to_csv=True,
+            output_file=os.path.join(output_dir, 'out.csv')
+        )
+
     observer = Observer()
     observer.schedule(FlowFileHandler(), path=output_dir, recursive=False)
     observer.start()
 
-    sniffer = create_sniffer(
-        input_interface=args.iface,
-        to_csv=True,
-        output_file=os.path.join(output_dir, 'out.csv')
-    )
     sniffer.start()
 
     try:
-        while True:
-            time.sleep(1)
+        if args.pcap:
+            sniffer.join()
+        else:
+            while True:
+                time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
         sniffer.stop()
