@@ -55,7 +55,13 @@ def create_flow_edges(flows_df):
     return edges
 
 def create_sparse_adjacency(edges, flow_count):
-    adjacency = np.zeros((flow_count, flow_count))
-    for edge in edges:
-        adjacency[edge[0], edge[1]] = 1
-    return adjacency
+    if len(edges) == 0:
+        indices = [[i, i] for i in range(flow_count)]
+        values = np.ones(flow_count)
+    else:
+        indices = edges
+        values = np.ones(len(edges))
+
+    adjency = tf.SparseTensor(indices=indices, values=values, dense_shape=[flow_count, flow_count])
+
+    return adjency
