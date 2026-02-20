@@ -88,6 +88,7 @@ def main():
     except KeyboardInterrupt:
         observer.stop()
         sniffer.stop()
+    
     observer.join()
 
 if __name__ == "__main__":
